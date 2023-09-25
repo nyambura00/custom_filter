@@ -1,28 +1,32 @@
-// TASK: create a custom filtering function that allows 
-// filtering elements from a given collection based on a specific condition
-
 fn main() {
     let sample_vec = vec!["aaa", "baa", "ddd", "daada", "zap"];
-    let filter_string = FilterCondition { filter_string: "aa".to_string() };
-    let result =  custom_filter(sample_vec, filter_string);
+    let filter_object = CustomFilter { col: &sample_vec, filter_value: "aa" };
+    let result = custom_filter(&filter_object);
 
     println!("Filtered Results: {:?}", result);
 }
 
-struct FilterCondition {
-    filter_string: String
+struct CustomFilter<'a, T> {
+    col: &'a Vec<T>,
+    filter_value: &'a str,
 }
 
-impl FilterCondition {
-    fn is_match(&mut self, filter_input: &str) -> bool{
-        filter_input.contains(&self.filter_string)
+impl<'a, T> CustomFilter<'a, T> {
+    fn is_match(&self, data: &T) -> bool
+    where
+        T: AsRef<str>,
+    {
+        data.as_ref().contains(self.filter_value)
     }
 }
 
-fn custom_filter(collection: Vec<&str>, mut filter_condition: FilterCondition ) -> Vec<&str>{
-    let col = collection
-                .into_iter() 
-                .filter(|&item| filter_condition.is_match(item))
-                .collect();
-    col
+fn custom_filter<'a, T>(filter_condition: &CustomFilter<'a, T>) -> Vec<&'a T>
+where
+    T: AsRef<str>,
+{
+    filter_condition
+        .col
+        .iter()
+        .filter(|&item| filter_condition.is_match(item))
+        .collect()
 }
